@@ -1,23 +1,21 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import { gql } from '@apollo/client';
 
-const httpLink = createHttpLink({
-  uri: 'https://api.github.com/graphql',
-});
-
-const authLink = setContext((_, { headers }) => {
-  const token = process.env.REACT_APP_GITHUB_TOKEN;
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
+export const GET_REPOSITORIES = gql`
+  query GetRepositories($searchTerm: String!, $after: String) {
+    search(query: $searchTerm, type: REPOSITORY, first: 10, after: $after) {
+      edges {
+        node {
+          id
+          name
+          stargazerCount
+          pushedAt
+          url
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
     }
-  };
-});
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
-});
-
-export default client;
+  }
+`;
